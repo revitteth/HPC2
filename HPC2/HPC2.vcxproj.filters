@@ -29,9 +29,18 @@
     <ClInclude Include="src\integrate.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\dumb_impl.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Timer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\vector_add_kernel.cl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\ex_integrate.cl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

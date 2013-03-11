@@ -10,13 +10,13 @@
 #include <string>
 
 // I think the idea is we rewrite these
-#include "functions.hpp";
+#include "functions.hpp"
 // In here, making use of OpenCL
-#include "integrate.hpp";
+#include "integrate.hpp"
 
-#include "Timer.hpp";
+#include "dumb_impl.hpp"
 
-using namespace cl;
+#include "Timer.hpp"
 
 int main(int argc, char **argv){
 
@@ -96,6 +96,17 @@ int main(int argc, char **argv){
 	{
 		std::cout << error.what() << "(" << error.err() << ")" << std::endl;
 	}
+
+	std::cin.get();
+
+	Test0();
+	//Test1();
+	//Test2();
+	//Test3();
+	//Test4();
+	//Test5();
+	//Test6();
+	Test0_dumb();
 
 	std::cin.get();
 	return 0;

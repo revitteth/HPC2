@@ -15,10 +15,13 @@
     <ClCompile Include="src\integrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\dumb_impl.hpp" />
     <ClInclude Include="src\functions.hpp" />
     <ClInclude Include="src\integrate.hpp" />
+    <ClInclude Include="src\Timer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\ex_integrate.cl" />
     <None Include="src\vector_add_kernel.cl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

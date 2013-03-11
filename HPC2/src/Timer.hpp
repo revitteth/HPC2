@@ -10,6 +10,8 @@ class Timer
 		tbb::tick_count start_time, end_time;
 
 	public:
+		Timer() {}
+
 		Timer(tbb::tick_count start_time) : start_time(start_time) {}
 
 		void Start(tbb::tick_count now) { start_time = now; }

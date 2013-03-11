@@ -1,24 +1,17 @@
-#ifndef INTEGRATE_HPP_
-#define INTEGRATE_HPP_
-
-#define __CL_ENABLE_EXCEPTIONS
-#define __NO_STD_VECTOR // Use cl::vector instead of STL version
-
-
 #include "functions.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <CL/cl.hpp>
 #include <tbb/tbb.h>
+#include "Timer.hpp"
 
 /* This is a simple example of multi-dimensional integration
 	using a simple (not necessarily optimal) spacing of points.
 	Note that this doesn't perform any error estimation - it
 	only calculates the value for a given grid size.
 */
-double IntegrateExample(
+double IntegrateExample_dumb(
   int functionCode,
   int n,	// How many points on each dimension
   const float *a, // An array of k lower bounds
@@ -94,26 +87,31 @@ double IntegrateExample(
 	return acc/(n0*n1*n2);
 }
 
-void Test0()
+void Test0_dumb()
 {
 	double exact=(exp(1)-1);	// Exact result
 	float a[1]={0};
 	float b[1]={1};
 	int n;
+
+	Timer* t0 = new Timer();
 	
-	for(n=2;n<=512;n*=2){		
-		double res=IntegrateExample(
+	for(n=2;n<=512;n*=2){
+		t0->Start(tbb::tick_count::now());
+		double res=IntegrateExample_dumb(
 		  0, // functionCode,
 		  n,	// How many points on each dimension
 		  a, // An array of k lower bounds
 		  b, // An array of k upper bounds
 		  NULL // Parameters to function (no parameters for this function)
 		);
-		fprintf(stderr, "F0, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
+		t0->Stop(tbb::tick_count::now());
+		std::cout << t0->getTime() << " seconds" << std::endl;
+		//fprintf(stderr, "F0, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
 }
 
-void Test1()
+void Test1_dumb()
 {
 	double exact=1.95683793560212f;	// Correct to about 10 digits
 	float a[2]={0,0};
@@ -122,7 +120,7 @@ void Test1()
 	int n;
 	
 	for(n=2;n<=1024;n*=2){		
-		double res=IntegrateExample(
+		double res=IntegrateExample_dumb(
 		  1, // functionCode,
 		  n,	// How many points on each dimension
 		  a, // An array of k lower bounds
@@ -133,7 +131,7 @@ void Test1()
 	}
 }
 
-void Test2()
+void Test2_dumb()
 {
 	double exact=9.48557252267795;	// Correct to about 6 digits
 	float a[3]={-1,-1,-1};
@@ -141,7 +139,7 @@ void Test2()
 	int n;
 	
 	for(n=2;n<=256;n*=2){		
-		double res=IntegrateExample(
+		double res=IntegrateExample_dumb(
 		  2, // functionCode,
 		  n,	// How many points on each dimension
 		  a, // An array of k lower bounds
@@ -152,7 +150,7 @@ void Test2()
 	}
 }
 
-void Test3()
+void Test3_dumb()
 {
 	double exact=-7.18387139942142f;	// Correct to about 6 digits
 	float a[3]={0,0,0};
@@ -161,7 +159,7 @@ void Test3()
 	int n;
 	
 	for(n=2;n<=256;n*=2){		
-		double res=IntegrateExample(
+		double res=IntegrateExample_dumb(
 		  3, // functionCode,
 		  n,	// How many points on each dimension
 		  a, // An array of k lower bounds
@@ -172,7 +170,7 @@ void Test3()
 	}
 }
 
-void Test4()
+void Test4_dumb()
 {
 	double exact=0.677779532970409f;	// Correct to about 8 digits
 	float a[3]={-16,-16,-16};	// We're going to cheat, and assume -16=-infinity.
@@ -189,7 +187,7 @@ void Test4()
 	int n;
 	
 	for(n=2;n<=512;n*=2){		
-		double res=IntegrateExample(
+		double res=IntegrateExample_dumb(
 		  4, // functionCode,
 		  n,	// How many points on each dimension
 		  a, // An array of k lower bounds
@@ -200,7 +198,7 @@ void Test4()
 	}
 }
 
-void Test5()
+void Test5_dumb()
 {
 	double exact=13.4249394627056;	// Correct to about 6 digits
 	float a[3]={0,0,0};
@@ -208,7 +206,7 @@ void Test5()
 	int n;
 	
 	for(n=2;n<=512;n*=2){		
-		double res=IntegrateExample(
+		double res=IntegrateExample_dumb(
 		  5, // functionCode,
 		  n,	// How many points on each dimension
 		  a, // An array of k lower bounds
@@ -219,7 +217,7 @@ void Test5()
 	}
 }
 
-void Test6()
+void Test6_dumb()
 {
 	// Integrate over a shell with radius 3 and width 0.02
 	//  = volume of a sphere of 3.01 minus a sphere of 2.99
@@ -230,7 +228,7 @@ void Test6()
 	int n;
 	
 	for(n=2;n<=2048;n*=2){		
-		double res=IntegrateExample(
+		double res=IntegrateExample_dumb(
 		  6, // functionCode,
 		  n,	// How many points on each dimension
 		  a, // An array of k lower bounds
@@ -240,6 +238,3 @@ void Test6()
 		fprintf(stderr, "F6, n=%d, value=%lf, error=%lg	\n", n, res, res-exact);
 	}
 }
-
-
-#endif
