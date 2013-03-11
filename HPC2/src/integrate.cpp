@@ -1,6 +1,7 @@
-#include <CL/cl.hpp>
 #include <tbb/tbb.h>
 #include <iostream>
+
+#include <CL/cl.hpp>
 
 // I think the idea is we rewrite these
 #include "functions.hpp";

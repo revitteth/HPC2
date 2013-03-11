@@ -15,6 +15,14 @@
     <ClCompile Include="src\integrate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="opencl\cl.h" />
+    <ClInclude Include="opencl\cl.hpp" />
+    <ClInclude Include="opencl\cl_d3d10.h" />
+    <ClInclude Include="opencl\cl_ext.h" />
+    <ClInclude Include="opencl\cl_gl.h" />
+    <ClInclude Include="opencl\cl_gl_ext.h" />
+    <ClInclude Include="opencl\cl_platform.h" />
+    <ClInclude Include="opencl\opencl.h" />
     <ClInclude Include="src\functions.hpp" />
     <ClInclude Include="src\integrate.hpp" />
   </ItemGroup>
