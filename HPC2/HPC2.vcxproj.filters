@@ -40,7 +40,10 @@
     <None Include="src\vector_add_kernel.cl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="src\ex_integrate.cl">
+    <None Include="src\integrate_test0.cl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\integrate_setup.cl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

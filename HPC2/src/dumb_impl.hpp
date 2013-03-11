@@ -87,7 +87,7 @@ double IntegrateExample_dumb(
 	return acc/(n0*n1*n2);
 }
 
-void Test0_dumb()
+Timer* Test0_dumb()
 {
 	double exact=(exp(1)-1);	// Exact result
 	float a[1]={0};
@@ -96,7 +96,8 @@ void Test0_dumb()
 
 	Timer* t0 = new Timer();
 	
-	for(n=2;n<=512;n*=2){
+	for(n=2;n<=512;n*=2)
+	{
 		t0->Start(tbb::tick_count::now());
 		double res=IntegrateExample_dumb(
 		  0, // functionCode,
@@ -106,20 +107,26 @@ void Test0_dumb()
 		  NULL // Parameters to function (no parameters for this function)
 		);
 		t0->Stop(tbb::tick_count::now());
-		std::cout << t0->getTime() << " seconds" << std::endl;
+		std::cout << t0->getLastTime() << " seconds" << std::endl;
 		//fprintf(stderr, "F0, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
+	std::cout << t0->getTotalTime() << " seconds total" << std::endl;
+	return t0;
 }
 
-void Test1_dumb()
+Timer* Test1_dumb()
 {
 	double exact=1.95683793560212f;	// Correct to about 10 digits
 	float a[2]={0,0};
 	float b[2]={1,1};
 	float params[2]={0.5,0.5};
 	int n;
+
+	Timer* t1 = new Timer();
 	
-	for(n=2;n<=1024;n*=2){		
+	for(n=2;n<=1024;n*=2)
+	{
+		t1->Start(tbb::tick_count::now());
 		double res=IntegrateExample_dumb(
 		  1, // functionCode,
 		  n,	// How many points on each dimension
@@ -128,7 +135,11 @@ void Test1_dumb()
 		  params // Parameters to function
 		);
 		fprintf(stderr, "F1, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
+		t1->Stop(tbb::tick_count::now());
+		std::cout << t1->getLastTime() << " seconds" << std::endl;
 	}
+
+	return t1;
 }
 
 void Test2_dumb()
