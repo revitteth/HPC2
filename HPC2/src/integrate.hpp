@@ -184,7 +184,7 @@ void Test4()
 		1.5, -0.5, -0.5,
 		-0.5, 1.5, -0.5,
 		-0.5, -0.5, 1.5,
-		pow(2*PI,-3.0/2.0)*pow(0.5,-0.5) // This is the scale factor
+		(float)pow(2*PI,-3.0/2.0)*pow(0.5,-0.5) // This is the scale factor
 	};
 	int n;
 	

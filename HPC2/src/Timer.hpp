@@ -11,12 +11,16 @@ class Timer
 		std::vector<double> times;
 
 	public:
+		// default constructor
 		Timer() {}
 
+		// construct and initialise timer with start time
 		Timer(tbb::tick_count start_time) : start_time(start_time) {}
 
+		// start the timer at given time
 		void Start(tbb::tick_count now) { start_time = now; }
 
+		// stop the timer at given time and save interval to times
 		double Stop(tbb::tick_count now) 
 		{
 			end_time = now;
@@ -26,12 +30,16 @@ class Timer
 			return time;
 		}
 
+		// number of times stored in vector times
+		unsigned count() { return times.size(); }
+
+		// the last recorded time interval
 		double lastTime() { return times.back(); }
 
-		unsigned timesCount() { return times.size(); }
-
+		// time at given index of times
 		double timeAt(unsigned index) { return times.at(index); }
-
+		
+		// total time (sum of intervals) stored in times
 		double totalTime()
 		{
 			double sum;
