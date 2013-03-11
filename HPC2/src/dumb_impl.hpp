@@ -107,10 +107,10 @@ Timer* Test0_dumb()
 		  NULL // Parameters to function (no parameters for this function)
 		);
 		t0->Stop(tbb::tick_count::now());
-		std::cout << t0->getLastTime() << " seconds" << std::endl;
+		std::cout << t0->lastTime() << " seconds" << std::endl;
 		//fprintf(stderr, "F0, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
-	std::cout << t0->getTotalTime() << " seconds total" << std::endl;
+
 	return t0;
 }
 
@@ -136,7 +136,7 @@ Timer* Test1_dumb()
 		);
 		fprintf(stderr, "F1, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 		t1->Stop(tbb::tick_count::now());
-		std::cout << t1->getLastTime() << " seconds" << std::endl;
+		std::cout << t1->lastTime() << " seconds" << std::endl;
 	}
 
 	return t1;

@@ -26,11 +26,13 @@ class Timer
 			return time;
 		}
 
-		double getLastTime() { return times.back(); }
+		double lastTime() { return times.back(); }
 
-		double getTimeAt(unsigned index) { return times.at(index); }
+		unsigned timesCount() { return times.size(); }
 
-		double getTotalTime()
+		double timeAt(unsigned index) { return times.at(index); }
+
+		double totalTime()
 		{
 			double sum;
 			for(unsigned i = 0; i < times.size(); i++)
