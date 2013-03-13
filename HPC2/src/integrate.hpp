@@ -4,8 +4,6 @@
 #define __CL_ENABLE_EXCEPTIONS
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
 
-#include "functions.hpp"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -13,6 +11,9 @@
 
 #include <CL/cl.hpp>
 #include <tbb/tbb.h>
+
+#include "functions.hpp"
+#include "Timer.hpp"
 
 template <typename T>
 	std::string NumberToString ( T Number )
@@ -30,6 +31,7 @@ double IntegrateExample(
   const float *params // Parameters to function
 ){
 	int k=-1, total=-1, i0, i1, i2, j, p_size;
+	const int p_size_max = 10;
 
 	int n0=n, n1=n, n2=n;	// By default use n points in each dimension
 
@@ -50,18 +52,17 @@ double IntegrateExample(
 	int total_points = n0*n1*n2;
 	int n_array[3] = {n0, n1, n2};
 
-	const float* new_params[10] = {0};
-	int params_size = 0;
-	for(int i = 0; i < 10; i++)
+	const float* new_params[p_size_max] = {0};
+	if (p_size > 0)
 	{
-		if (i <= p_size-1)
+		for(int i = 0; i < p_size; i++)
 		{
 			new_params[i] = &params[i];
-			std::cout << &params[i] << " params at i" << std::endl;
-			params_size++;
-			std::cout << "PARAMS SIZE NOW " << params_size << std::endl;
+			std::cout << new_params[i] << " and " << &params[i] << std::endl;
 		}
 	}
+
+	std::cout << "PSIZE " << p_size << std::endl;
 
 	std::string func = "integrate_F" + NumberToString(functionCode);
 
@@ -104,17 +105,23 @@ double IntegrateExample(
 	cl::Buffer buf_b = cl::Buffer(context, CL_MEM_READ_ONLY, k * sizeof(float));
 	cl::Buffer buf_out = cl::Buffer(context, CL_MEM_WRITE_ONLY, total_points * sizeof(float));
 	cl::Buffer buf_n = cl::Buffer(context, CL_MEM_READ_ONLY, 3 * sizeof(int));
+	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY, p_size_max * sizeof(float));
+	cl::Buffer buf_p_size = cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(int));
 		
 	// Copy lists A and B to the memory buffers
 	queue.enqueueWriteBuffer(buf_a, CL_TRUE, 0, k * sizeof(float), &a[0]);
 	queue.enqueueWriteBuffer(buf_b, CL_TRUE, 0, k * sizeof(float), &b[0]);
 	queue.enqueueWriteBuffer(buf_n, CL_TRUE, 0, 3 * sizeof(int), &n_array[0]);
+	queue.enqueueWriteBuffer(buf_params, CL_TRUE, 0, p_size_max * sizeof(float), &new_params[0]);
+	queue.enqueueWriteBuffer(buf_p_size, CL_TRUE, 0, sizeof(int), &p_size);
  
 	// Set arguments to kernel
 	kernel.setArg(0, buf_a);
 	kernel.setArg(1, buf_b);
 	kernel.setArg(2, buf_out);
 	kernel.setArg(3, buf_n);
+	kernel.setArg(4, buf_params);
+	kernel.setArg(5, buf_p_size);
 
 	cl::NDRange global(total_points);
 	cl::NDRange local(1);
@@ -133,14 +140,17 @@ double IntegrateExample(
 	return acc/(total_points);
 }
 
-void Test0()
+Timer* Test0()
 {
 	double exact=(exp(1)-1);	// Exact result
 	float a[1]={0};
 	float b[1]={1};
 	int n;
 	
-	for(n=2;n<=512;n*=2){		
+	Timer* t0 = new Timer();
+
+	for(n=2;n<=512;n*=2){
+		t0->Start(tbb::tick_count::now());
 		double res=IntegrateExample(
 		  0, // functionCode,
 		  n,	// How many points on each dimension
@@ -148,8 +158,10 @@ void Test0()
 		  b, // An array of k upper bounds
 		  NULL // Parameters to function (no parameters for this function)
 		);
+		t0->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F0, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
+	return t0;
 }
 
 void Test1()
