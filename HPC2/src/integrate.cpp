@@ -20,15 +20,20 @@
 
 int main(int argc, char **argv){ 
 
-
-	Test0();
-	Test1();
-	//Test2();
+	//std::cout << "		1" << std::endl;
+	//Test0();
+	//Test0_dumb();
+	//std::cout << "		2" << std::endl;
+	//Test1();
+	//Test1_dumb();
+	std::cout << "		3" << std::endl;
+	Test2();
+	Test2_dumb();
 	//Test3();
 	//Test4();
 	//Test5();
 	//Test6();
-	Test0_dumb();
+	
 
 	std::cin.get();
 	return 0;

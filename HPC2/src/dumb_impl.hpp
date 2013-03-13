@@ -69,8 +69,8 @@ double IntegrateExample_dumb(
 				// MAKE A FUNCTION POINTER FURTHER UP THEN USE IT!!!!
 				switch(functionCode){
 				case 0:	acc+=F0(x,params);	break;
-				case 1:	acc+=F1(x,params);	break;
-				case 2:	acc+=F2(x,params);	break;
+				case 1:	acc+=F1(x,params);  break;
+				case 2:	acc+=F2(x,params);  std::cout << i2 << std::endl;   break;
 				case 3:	acc+=F3(x,params);	break;
 				case 4:	acc+=F4(x,params);	break;
 				case 5:	acc+=F5(x,params);	break;
@@ -79,6 +79,7 @@ double IntegrateExample_dumb(
 			}
 		}
 	}
+	std::cin.get();
 	
 	// Do the final normalisation and return the results
 	for(j=0;j<k;j++){
@@ -136,7 +137,7 @@ Timer* Test1_dumb()
 		);
 		fprintf(stderr, "F1, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 		t1->Stop(tbb::tick_count::now());
-		std::cout << t1->lastTime() << " seconds" << std::endl;
+		//std::cout << t1->lastTime() << " seconds" << std::endl;
 	}
 
 	return t1;

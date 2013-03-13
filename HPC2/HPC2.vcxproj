@@ -22,6 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\integrate_F1.cl" />
+    <None Include="src\integrate_F2.cl" />
     <None Include="src\integrate_setup.cl" />
     <None Include="src\integrate_F0.cl" />
     <None Include="src\vector_add_kernel.cl" />

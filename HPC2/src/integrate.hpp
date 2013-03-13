@@ -42,8 +42,8 @@ double IntegrateExample(
 		case 2:	k=3; p_size = 0; break;
 		case 3:	k=3; p_size = 1; break;
 		case 4:	k=3; p_size = 10; break;
-		case 5:	k=3; p_size = 1; break;
-		case 6:	k=3; p_size = 1; break;
+		case 5:	k=3; p_size = 0; break;
+		case 6:	k=3; p_size = 2; break;
 		default:
 			fprintf(stderr, "Invalid function code.");
 			exit(1);
@@ -52,17 +52,14 @@ double IntegrateExample(
 	int total_points = n0*n1*n2;
 	int n_array[3] = {n0, n1, n2};
 
-	const float* new_params[p_size_max] = {0};
+	float* new_params = new float[p_size_max];
 	if (p_size > 0)
 	{
 		for(int i = 0; i < p_size; i++)
 		{
-			new_params[i] = &params[i];
-			std::cout << new_params[i] << " and " << &params[i] << std::endl;
+			new_params[i] = params[i];
 		}
 	}
-
-	std::cout << "PSIZE " << p_size << std::endl;
 
 	std::string func = "integrate_F" + NumberToString(functionCode);
 
@@ -108,7 +105,7 @@ double IntegrateExample(
 	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY, p_size_max * sizeof(float));
 	cl::Buffer buf_p_size = cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(int));
 		
-	// Copy lists A and B to the memory buffers
+	// Copy data to memory buffers
 	queue.enqueueWriteBuffer(buf_a, CL_TRUE, 0, k * sizeof(float), &a[0]);
 	queue.enqueueWriteBuffer(buf_b, CL_TRUE, 0, k * sizeof(float), &b[0]);
 	queue.enqueueWriteBuffer(buf_n, CL_TRUE, 0, 3 * sizeof(int), &n_array[0]);
@@ -127,7 +124,7 @@ double IntegrateExample(
 	cl::NDRange local(1);
 
 	// Run the kernel on specific ND range
-	float* out = new float[n0];
+	float* out = new float[total_points];
 	queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
 	queue.enqueueReadBuffer(buf_out, CL_TRUE, 0, total_points * sizeof(float), out);
 
@@ -135,8 +132,16 @@ double IntegrateExample(
 
 	for(int i = 0; i < total_points; i++)
 	{
-		acc += out[i];
+		std::cout << out[i] << std::endl;
+		acc += out[i];	
 	}
+
+	std::cin.get();
+
+	for(j=0;j<k;j++){
+		acc = acc*(b[j]-a[j]);
+	}
+
 	return acc/(total_points);
 }
 

@@ -49,5 +49,8 @@
     <None Include="src\integrate_F1.cl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="src\integrate_F2.cl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
