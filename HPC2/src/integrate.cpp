@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 
 
 	Test0();
-	//Test1();
+	Test1();
 	//Test2();
 	//Test3();
 	//Test4();
