@@ -4,7 +4,6 @@
 #define __CL_ENABLE_EXCEPTIONS
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
 
-
 #include "functions.hpp"
 
 #include <stdio.h>
@@ -23,8 +22,6 @@ template <typename T>
 		return ss.str();
 	}
 
-
-
 double IntegrateExample(
   int functionCode,
   int n,	// How many points on each dimension
@@ -32,17 +29,17 @@ double IntegrateExample(
   const float *b, // An array of k upper bounds
   const float *params // Parameters to function
 ){
-	int k=-1, total=-1, i0, i1, i2, j;
+	int k=-1, total=-1, i0, i1, i2, j, p_size;
 
 	switch(functionCode)
 	{
-		case 0:	k=1;	break;
-		case 1:	k=2;	break;
-		case 2:	k=3;	break;
-		case 3:	k=3;	break;
-		case 4:	k=3;	break;
-		case 5:	k=3;	break;
-		case 6:	k=3;	break;
+		case 0:	k=1; p_size = 0; break;
+		case 1:	k=2; p_size = 2; break;
+		case 2:	k=3; p_size = 0; break;
+		case 3:	k=3; p_size = 1; break;
+		case 4:	k=3; p_size = 10; break;
+		case 5:	k=3; p_size = 1; break;
+		case 6:	k=3; p_size = 1; break;
 		default:
 			fprintf(stderr, "Invalid function code.");
 			exit(1);
@@ -50,6 +47,7 @@ double IntegrateExample(
 
 	float acc=0;
 	float* x = new float[k];
+	float* Acc = new float[1];
 
 	int n0=n, n1=n, n2=n;	// By default use n points in each dimension
 
@@ -65,7 +63,7 @@ double IntegrateExample(
 		(cl_context_properties)(platforms[0])(),
 		0
 	};
-	cl::Context context(CL_DEVICE_TYPE_GPU, cps);
+	cl::Context context(CL_DEVICE_TYPE_ALL, cps);
  
 	// Get a list of devices on this platform
 	cl::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
@@ -89,29 +87,33 @@ double IntegrateExample(
 	// Make kernel
 	cl::Kernel kernel(program, func.c_str());
 
-	// Create memory buffers - all sizes just copied from above :)
-	cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY, n * sizeof(float));
-	cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY, n * sizeof(float));
-	cl::Buffer bufferX = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_HOST_PTR, k * sizeof(float));
+	// Create memory buffers
+	cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY, k * sizeof(float));
+	cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY, k * sizeof(float));
+	cl::Buffer bufferOut = cl::Buffer(context, CL_MEM_WRITE_ONLY, n0*n1*n2 * sizeof(float));
 		
 	// Copy lists A and B to the memory buffers
-	queue.enqueueWriteBuffer(bufferA, CL_TRUE, 0, n * sizeof(float), a);
-	queue.enqueueWriteBuffer(bufferB, CL_TRUE, 0, n * sizeof(float), b);
-	queue.enqueueWriteBuffer(bufferX, CL_TRUE, 0, k * sizeof(float), x);
+	queue.enqueueWriteBuffer(bufferA, CL_TRUE, 0, k * sizeof(float), &a[0]);
+	queue.enqueueWriteBuffer(bufferB, CL_TRUE, 0, k * sizeof(float), &b[0]);
  
 	// Set arguments to kernel
 	kernel.setArg(0, bufferA);
 	kernel.setArg(1, bufferB);
-	kernel.setArg(3, bufferX);
+	kernel.setArg(3, bufferOut);
+
+	cl::NDRange global(n0*n1*n2);
+	cl::NDRange local(1);
 
 	// Run the kernel on specific ND range
-	queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(n1), cl::NDRange(1));
+	float* out = new float[n0*n1*n2];
+	queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+	queue.enqueueReadBuffer(bufferOut, CL_TRUE, 0, n0*n1*n2*sizeof(float), out);
 
-	// pass another buffer (write only array)
-	//queue.enqueueReadBuffer(, CL_TRUE, 0, sizeof(float), );
-
-	
-	return acc;
+	for(int i = 0; i < n0*n1*n2; i++)
+	{
+		std::cout << out[i] << std::endl;
+	}
+	return 1.0;
 }
 
 void Test0()
