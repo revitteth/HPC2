@@ -74,7 +74,7 @@ double IntegrateExample_dumb(
 				case 3:	acc+=F3(x,params);	break;
 				case 4:	acc+=F4(x,params);	break;
 				case 5:	acc+=F5(x,params);	break;
-				case 6:	acc+=F6(x,params);	break;
+				case 6:	acc+=F6(x,params);	break;				   
 				}
 			}
 		}
@@ -107,8 +107,8 @@ Timer* Test0_dumb()
 		  NULL // Parameters to function (no parameters for this function)
 		);
 		t0->Stop(tbb::tick_count::now());
-		std::cout << t0->lastTime() << " seconds" << std::endl;
-		//fprintf(stderr, "F0, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
+		//std::cout << t0->lastTime() << " seconds" << std::endl;
+		fprintf(stderr, "F0, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
 
 	return t0;

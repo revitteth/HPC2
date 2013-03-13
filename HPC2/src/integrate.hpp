@@ -9,15 +9,22 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
+#include <sstream>
 
 #include <CL/cl.hpp>
 #include <tbb/tbb.h>
 
-/* This is a simple example of multi-dimensional integration
-	using a simple (not necessarily optimal) spacing of points.
-	Note that this doesn't perform any error estimation - it
-	only calculates the value for a given grid size.
-*/
+template <typename T>
+	std::string NumberToString ( T Number )
+	{
+		std::ostringstream ss;
+		ss << Number;
+		return ss.str();
+	}
+
+
+
 double IntegrateExample(
   int functionCode,
   int n,	// How many points on each dimension
@@ -26,14 +33,9 @@ double IntegrateExample(
   const float *params // Parameters to function
 ){
 	int k=-1, total=-1, i0, i1, i2, j;
-	// Accumulate in double, as it avoids floating-point errors when adding large
-	// numbers of values together. Note that using double in a GPU has implications,
-	// as some GPUs cannot do doubles, and on others they are much slower than floats
-	double acc=0;	
-	//float *x=NULL;
-	int n0=n, n1=n, n2=n;	// By default use n points in each dimension
-	
-	switch(functionCode){
+
+	switch(functionCode)
+	{
 		case 0:	k=1;	break;
 		case 1:	k=2;	break;
 		case 2:	k=3;	break;
@@ -45,53 +47,71 @@ double IntegrateExample(
 			fprintf(stderr, "Invalid function code.");
 			exit(1);
 	}
-	
-	// Collapse any dimensions we don't use
-	if(k<3){
-		n2=1;
-	}
-	if(k<2){
-		n1=1;
-	}
-	
+
+	float acc=0;
 	float* x = new float[k];
 
-	// Loop over highest dimension on outside, as it might be collapsed to zero
-	for(i2=0;i2<n2;i2++){
-		if(k>=2){
-			x[2]=a[2]+(b[2]-a[2]) * (i2+0.5f)/n2;
-		}
+	int n0=n, n1=n, n2=n;	// By default use n points in each dimension
+
+	std::string func = "integrate_F" + NumberToString(functionCode);
+
+	// Get available platforms
+	cl::vector<cl::Platform> platforms;
+	cl::Platform::get(&platforms);
+ 
+	// Select the default platform and create a context using this platform and the GPU
+	cl_context_properties cps[3] = {
+		CL_CONTEXT_PLATFORM,
+		(cl_context_properties)(platforms[0])(),
+		0
+	};
+	cl::Context context(CL_DEVICE_TYPE_GPU, cps);
+ 
+	// Get a list of devices on this platform
+	cl::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+ 
+	// Create a command queue and use the first device
+	cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
+ 
+	// Read source file
+	std::ifstream sourceFile("..\\HPC2\\src\\" + func + ".cl");
+	std::string sourceCode(
+		std::istreambuf_iterator<char>(sourceFile),
+		(std::istreambuf_iterator<char>()));
+	cl::Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length()+1));
+ 
+	// Make program of the source code in the context
+	cl::Program program = cl::Program(context, source);
+ 
+	// Build program for these specific devices
+	program.build(devices);
+ 
+	// Make kernel
+	cl::Kernel kernel(program, func.c_str());
+
+	// Create memory buffers - all sizes just copied from above :)
+	cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY, n * sizeof(float));
+	cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY, n * sizeof(float));
+	cl::Buffer bufferX = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_HOST_PTR, k * sizeof(float));
 		
-		for(i1=0;i1<n1;i1++){
-			if(k>=1){
-				x[1]=a[1]+(b[1]-a[1]) * (i1+0.5f)/n1;
-			}
-			
-			// Inner dimension is never collapsed to zero
-			for(i0=0;i0<n0;i0++){
-				x[0]=a[0]+(b[0]-a[0]) * (i0+0.5f)/n0;
-				
-				// Now call the function. Note that it is rather
-				// inefficient to be choosing the function in the inner loop... 
-				// MAKE A FUNCTION POINTER FURTHER UP THEN USE IT!!!!
-				switch(functionCode){
-				case 0:	acc+=F0(x,params);	break;
-				case 1:	acc+=F1(x,params);	break;
-				case 2:	acc+=F2(x,params);	break;
-				case 3:	acc+=F3(x,params);	break;
-				case 4:	acc+=F4(x,params);	break;
-				case 5:	acc+=F5(x,params);	break;
-				case 6:	acc+=F6(x,params);	break;
-				}
-			}
-		}
-	}
+	// Copy lists A and B to the memory buffers
+	queue.enqueueWriteBuffer(bufferA, CL_TRUE, 0, n * sizeof(float), a);
+	queue.enqueueWriteBuffer(bufferB, CL_TRUE, 0, n * sizeof(float), b);
+	queue.enqueueWriteBuffer(bufferX, CL_TRUE, 0, k * sizeof(float), x);
+ 
+	// Set arguments to kernel
+	kernel.setArg(0, bufferA);
+	kernel.setArg(1, bufferB);
+	kernel.setArg(3, bufferX);
+
+	// Run the kernel on specific ND range
+	queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(n1), cl::NDRange(1));
+
+	// pass another buffer (write only array)
+	//queue.enqueueReadBuffer(, CL_TRUE, 0, sizeof(float), );
+
 	
-	// Do the final normalisation and return the results
-	for(j=0;j<k;j++){
-		acc=acc*(b[j]-a[j]);
-	}
-	return acc/(n0*n1*n2);
+	return acc;
 }
 
 void Test0()

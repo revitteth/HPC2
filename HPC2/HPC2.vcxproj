@@ -21,8 +21,9 @@
     <ClInclude Include="src\Timer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\integrate_F1.cl" />
     <None Include="src\integrate_setup.cl" />
-    <None Include="src\integrate_test0.cl" />
+    <None Include="src\integrate_F0.cl" />
     <None Include="src\vector_add_kernel.cl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
