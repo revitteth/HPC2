@@ -3,7 +3,9 @@ __kernel void integrate_F6(
 		__constant float* b, 
 		__global float* out,
 		__constant int* n,
-		__constant float* params
+		__constant float* params,
+		__global float* acc,
+		__constant int* chunks
 		)
 {
 	short ggs1 = get_global_size(1);

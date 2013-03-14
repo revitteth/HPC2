@@ -32,17 +32,17 @@ int main(int argc, char **argv){
 	std::cout << "		3" << std::endl;
 	std::cout << "GPU " << Test3()->totalTime() << std::endl;
 	std::cout << "CPU " << Test3_dumb()->totalTime() << std::endl;*/
-	Timer* t3 = Test3();
-	Timer* t3_dumb = Test3_dumb();
-	for(int i = 0; i<t3->count();i++)
-	{
-		std::cout << i << ": CPU(3) " << t3_dumb->timeAt(i) << "		GPU(3) " << t3->timeAt(i) << std::endl;
-	}
-	std::cout << "-----------------------------------------------------------" << std::endl;
-	std::cout << "T: CPU(3) " << t3_dumb->totalTime() << "		GPU(3) " << t3->totalTime() << std::endl;
-	std::cout << "-----------------------------------------------------------" << std::endl;
-	std::cout << "-----------------------------------------------------------" << std::endl << std::endl;
-	//Test4();
+	//Timer* t3 = Test3();
+	////Timer* t3_dumb = Test3_dumb();
+	//for(int i = 0; i<t3->count();i++)
+	//{
+	//	std::cout << i << ": CPU(3) " << t3_dumb->timeAt(i) << "		GPU(3) " << t3->timeAt(i) << std::endl;
+	//}
+	//std::cout << "-----------------------------------------------------------" << std::endl;
+	//std::cout << "T: CPU(3) " << t3_dumb->totalTime() << "		GPU(3) " << t3->totalTime() << std::endl;
+	//std::cout << "-----------------------------------------------------------" << std::endl;
+	//std::cout << "-----------------------------------------------------------" << std::endl << std::endl;
+	Test4();
 	//Test4_dumb();
 	//Test5();
 	//Test5_dumb();

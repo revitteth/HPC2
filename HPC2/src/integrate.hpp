@@ -33,6 +33,9 @@ double IntegrateExample(
 	int k=-1, total=-1, i0, i1, i2, j, p_size;
 	const int p_size_max = 10;
 
+	// split the problem into chunks
+	int chunks = 2;
+
 	int n0=n, n1=n, n2=n;	// By default use n points in each dimension
 
 	switch(functionCode)
@@ -48,6 +51,10 @@ double IntegrateExample(
 			fprintf(stderr, "Invalid function code.");
 			exit(1);
 	}
+
+	n0 = n0/chunks;
+	n1 = n1/chunks;
+	n2 = n2/chunks;
 
 	int total_points = n0*n1*n2;
 	int n_array[3] = {n0, n1, n2};
@@ -73,7 +80,7 @@ double IntegrateExample(
 		(cl_context_properties)(platforms[0])(),
 		0
 	};
-	cl::Context context(CL_DEVICE_TYPE_CPU, cps);
+	cl::Context context(CL_DEVICE_TYPE_ALL, cps);
  
 	// Get a list of devices on this platform
 	cl::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
@@ -104,12 +111,14 @@ double IntegrateExample(
 	cl::Buffer buf_n = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, 3 * sizeof(int));
 	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, p_size_max * sizeof(float));
 	cl::Buffer buf_acc = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(float));
+	cl::Buffer buf_chunks = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(int));
 		
 	// Copy data to memory buffers
 	queue.enqueueWriteBuffer(buf_a, CL_TRUE, 0, k * sizeof(float), &a[0]);
 	queue.enqueueWriteBuffer(buf_b, CL_TRUE, 0, k * sizeof(float), &b[0]);
 	queue.enqueueWriteBuffer(buf_n, CL_TRUE, 0, 3 * sizeof(int), &n_array[0]);
 	queue.enqueueWriteBuffer(buf_params, CL_TRUE, 0, p_size_max * sizeof(float), &new_params[0]);
+	queue.enqueueWriteBuffer(buf_chunks, CL_TRUE, 0, sizeof(int), &chunks);
  
 	// Set arguments to kernel
 	kernel.setArg(0, buf_a);
@@ -118,6 +127,7 @@ double IntegrateExample(
 	kernel.setArg(3, buf_n);
 	kernel.setArg(4, buf_params);
 	kernel.setArg(5, buf_acc);
+	kernel.setArg(6, buf_chunks);
 	
 	cl::NDRange global(n0, n1, n2);
 	cl::NDRange local(1, 1, 1);	

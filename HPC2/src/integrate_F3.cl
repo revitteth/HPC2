@@ -4,7 +4,8 @@ __kernel void integrate_F3(
 		__global float* out,
 		__constant int* n,
 		__constant float* params,
-		__global float* acc
+		__global float* acc,
+		__constant int* chunks
 		)
 {
 	// get local id of work item 
