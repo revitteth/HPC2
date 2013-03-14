@@ -6,16 +6,16 @@ __kernel void integrate_F1(
 		__constant float* params
 		)
 {
-		// get local id of work item
-		int index = get_global_id(0);
+	// get local id of work item
+	int index = get_global_id(0);
 
-		int i0 = fmod((float)index, (float)n[0]);
-		int i1 = floor(native_divide((float)index, (float)n[1]));
+	int i0 = get_global_id(0);
+	int i1 = get_global_id(1);
 
-		float x[3] = { 0.0f };
+	float x[3] = { 0.0f };
 
-		x[1]=a[1]+(b[1]-a[1]) * native_divide((i1+0.5f), n[1]);
-		x[0]=a[0]+(b[0]-a[0]) * native_divide((i0+0.5f), n[0]);
+	x[1]=a[1]+(b[1]-a[1]) * native_divide((i1+0.5f), n[1]);
+	x[0]=a[0]+(b[0]-a[0]) * native_divide((i0+0.5f), n[0]);
 
-		out[index] = native_sin(params[0] + x[0]*x[1]) * native_exp(params[1]+x[0]);
+	out[index] = native_sin(params[0] + x[0]*x[1]) * native_exp(params[1]+x[0]);
 }

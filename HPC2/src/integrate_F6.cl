@@ -8,7 +8,6 @@ __kernel void integrate_F6(
 {
 	short ggs1 = get_global_size(1);
 	short index = get_global_id(0) + (get_global_id(1)*ggs1) + (get_global_id(2)*ggs1*get_global_size(2));
-	//short index = get_global_id(0) + (get_global_id(1)*ggs1) + (get_global_id(2)*get_global_size(1)*get_global_size(2));
 
 	int i0 = fmod((float)index, (float)n[0]);
 	int i1 = fmod((float)floor(native_divide((float)index, (float)n[1])), n[1]);

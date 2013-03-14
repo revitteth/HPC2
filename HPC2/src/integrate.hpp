@@ -103,6 +103,7 @@ double IntegrateExample(
 	cl::Buffer buf_out = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, total_points * sizeof(float));
 	cl::Buffer buf_n = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, 3 * sizeof(int));
 	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, p_size_max * sizeof(float));
+	cl::Buffer buf_acc = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(float));
 		
 	// Copy data to memory buffers
 	queue.enqueueWriteBuffer(buf_a, CL_TRUE, 0, k * sizeof(float), &a[0]);
@@ -116,28 +117,28 @@ double IntegrateExample(
 	kernel.setArg(2, buf_out);
 	kernel.setArg(3, buf_n);
 	kernel.setArg(4, buf_params);
+	kernel.setArg(5, buf_acc);
 	
 	cl::NDRange global(n0, n1, n2);
-	cl::NDRange local(2, 2, 2);	
+	cl::NDRange local(1, 1, 1);	
 
 	// Run the kernel on specific ND range
-	float* out = new float[total_points];
+	float* out = new float;
 	if (n2 == 1 | n1 == 1)
 		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(total_points), cl::NDRange(1));
 	else if (n <= 8)
 		queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
 	else
-		queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NDRange(8, 8, 8));
+		queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NDRange(2,2,2));
 
-	queue.enqueueReadBuffer(buf_out, CL_TRUE, 0, total_points * sizeof(float), out);
+	queue.enqueueReadBuffer(buf_acc, CL_TRUE, 0, sizeof(float), out);
+
 	queue.flush();
 	queue.finish();
-	double acc = 0.0;
 
-	for(int i = 0; i < total_points; i++)
-	{
-		acc += out[i];	
-	}
+	float acc = 0.0;
+
+	acc = *out;
 
 	for(j=0;j<k;j++){
 		acc = acc*(b[j]-a[j]);

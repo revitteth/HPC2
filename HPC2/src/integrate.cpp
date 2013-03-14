@@ -42,7 +42,7 @@ int main(int argc, char **argv){
 	std::cout << "T: CPU(3) " << t3_dumb->totalTime() << "		GPU(3) " << t3->totalTime() << std::endl;
 	std::cout << "-----------------------------------------------------------" << std::endl;
 	std::cout << "-----------------------------------------------------------" << std::endl << std::endl;
-	Test4();
+	//Test4();
 	//Test4_dumb();
 	//Test5();
 	//Test5_dumb();
