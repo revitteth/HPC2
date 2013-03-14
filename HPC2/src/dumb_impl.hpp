@@ -70,7 +70,7 @@ double IntegrateExample_dumb(
 				switch(functionCode){
 				case 0:	acc+=F0(x,params);	break;
 				case 1:	acc+=F1(x,params);  break;
-				case 2:	acc+=F2(x,params);  std::cout << i2 << std::endl;   break;
+				case 2:	acc+=F2(x,params);  break;
 				case 3:	acc+=F3(x,params);	break;
 				case 4:	acc+=F4(x,params);	break;
 				case 5:	acc+=F5(x,params);	break;
@@ -79,7 +79,6 @@ double IntegrateExample_dumb(
 			}
 		}
 	}
-	std::cin.get();
 	
 	// Do the final normalisation and return the results
 	for(j=0;j<k;j++){
@@ -143,14 +142,17 @@ Timer* Test1_dumb()
 	return t1;
 }
 
-void Test2_dumb()
+Timer* Test2_dumb()
 {
 	double exact=9.48557252267795;	// Correct to about 6 digits
 	float a[3]={-1,-1,-1};
 	float b[3]={1,1,1};
 	int n;
+
+	Timer* t2 = new Timer();
 	
-	for(n=2;n<=256;n*=2){		
+	for(n=2;n<=256;n*=2){
+		t2->Start(tbb::tick_count::now());
 		double res=IntegrateExample_dumb(
 		  2, // functionCode,
 		  n,	// How many points on each dimension
@@ -158,19 +160,25 @@ void Test2_dumb()
 		  b, // An array of k upper bounds
 		  NULL // Parameters to function (no parameters for this function)
 		);
+		t2->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F2, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
+	
+	return t2;
 }
 
-void Test3_dumb()
+Timer* Test3_dumb()
 {
 	double exact=-7.18387139942142f;	// Correct to about 6 digits
 	float a[3]={0,0,0};
 	float b[3]={5,5,5};
 	float params[1]={2};
 	int n;
+
+	Timer* t3 = new Timer();
 	
 	for(n=2;n<=256;n*=2){		
+		t3->Start(tbb::tick_count::now());
 		double res=IntegrateExample_dumb(
 		  3, // functionCode,
 		  n,	// How many points on each dimension
@@ -178,8 +186,10 @@ void Test3_dumb()
 		  b, // An array of k upper bounds
 		  params // Parameters to function (no parameters for this function)
 		);
+		t3->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F3, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
+	return t3;
 }
 
 void Test4_dumb()

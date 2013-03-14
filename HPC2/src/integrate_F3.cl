@@ -1,4 +1,4 @@
-__kernel void integrate_F2(
+__kernel void integrate_F3(
 		__constant float* a, 
 		__constant float* b, 
 		__global float* out,
@@ -8,7 +8,10 @@ __kernel void integrate_F2(
 		)
 {
 	// get local id of work item 
-	int index = get_global_id(0) + (get_global_id(1)*get_global_size(1)) + (get_global_id(2)*get_global_size(1)*get_global_size(2));
+	//int index = get_global_id(0);
+	int ggs1 = get_global_size(1);
+	int index = get_global_id(0) + (get_global_id(1)*ggs1) + (get_global_id(2)*ggs1*get_global_size(2));
+	//int index = get_global_id(0) + (get_global_id(1)*get_global_size(1)) + (get_global_id(2)*get_global_size(1)*get_global_size(2));
 
 	int i0 = fmod((float)index, (float)n[0]);
 	int i1 = fmod((float)floor(native_divide((float)index, (float)n[1])), n[1]);
@@ -20,6 +23,10 @@ __kernel void integrate_F2(
 	x[1]=a[1]+(b[1]-a[1]) * native_divide((i1+0.5f), n[1]);
 	x[0]=a[0]+(b[0]-a[0]) * native_divide((i0+0.5f), n[0]);
 
-	out[index] = floor(native_exp(-x[0])) - floor(native_exp(x[1]))*native_sin(x[2]);
+	float v = native_powr(x[0], params[0]) + native_powr(x[1], params[0]) + native_powr(x[2],params[0]);
+	float dave = native_powr(v, native_divide(1, params[0]));
+	float geoff = native_divide(sin(dave), dave);
+
+	out[index] = geoff;
 
 }

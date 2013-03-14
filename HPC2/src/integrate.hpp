@@ -98,19 +98,19 @@ double IntegrateExample(
 	cl::Kernel kernel(program, func.c_str());
 
 	// Create memory buffers
-	cl::Buffer buf_a = cl::Buffer(context, CL_MEM_READ_ONLY, k * sizeof(float));
-	cl::Buffer buf_b = cl::Buffer(context, CL_MEM_READ_ONLY, k * sizeof(float));
-	cl::Buffer buf_out = cl::Buffer(context, CL_MEM_WRITE_ONLY, total_points * sizeof(float));
-	cl::Buffer buf_n = cl::Buffer(context, CL_MEM_READ_ONLY, 3 * sizeof(int));
-	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY, p_size_max * sizeof(float));
-	cl::Buffer buf_p_size = cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(int));
+	cl::Buffer buf_a = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, k * sizeof(float));
+	cl::Buffer buf_b = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, k * sizeof(float));
+	cl::Buffer buf_out = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, total_points * sizeof(float));
+	cl::Buffer buf_n = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, 3 * sizeof(int));
+	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, p_size_max * sizeof(float));
+	cl::Buffer buf_p_size = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(int));
 		
 	// Copy data to memory buffers
-	queue.enqueueWriteBuffer(buf_a, CL_TRUE, 0, k * sizeof(float), &a[0]);
-	queue.enqueueWriteBuffer(buf_b, CL_TRUE, 0, k * sizeof(float), &b[0]);
-	queue.enqueueWriteBuffer(buf_n, CL_TRUE, 0, 3 * sizeof(int), &n_array[0]);
-	queue.enqueueWriteBuffer(buf_params, CL_TRUE, 0, p_size_max * sizeof(float), &new_params[0]);
-	queue.enqueueWriteBuffer(buf_p_size, CL_TRUE, 0, sizeof(int), &p_size);
+	queue.enqueueWriteBuffer(buf_a, CL_FALSE, 0, k * sizeof(float), &a[0]);
+	queue.enqueueWriteBuffer(buf_b, CL_FALSE, 0, k * sizeof(float), &b[0]);
+	queue.enqueueWriteBuffer(buf_n, CL_FALSE, 0, 3 * sizeof(int), &n_array[0]);
+	queue.enqueueWriteBuffer(buf_params, CL_FALSE, 0, p_size_max * sizeof(float), &new_params[0]);
+	queue.enqueueWriteBuffer(buf_p_size, CL_FALSE, 0, sizeof(int), &p_size);
  
 	// Set arguments to kernel
 	kernel.setArg(0, buf_a);
@@ -119,24 +119,28 @@ double IntegrateExample(
 	kernel.setArg(3, buf_n);
 	kernel.setArg(4, buf_params);
 	kernel.setArg(5, buf_p_size);
-
-	cl::NDRange global(total_points);
-	cl::NDRange local(1);
+	
+	cl::NDRange global(n0, n1, n2);
+	cl::NDRange local(2, 2, 2);	
 
 	// Run the kernel on specific ND range
 	float* out = new float[total_points];
-	queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
-	queue.enqueueReadBuffer(buf_out, CL_TRUE, 0, total_points * sizeof(float), out);
+	if (n2 == 1 | n1 == 1)
+		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(total_points), cl::NDRange(1));
+	else if (n <= 8)
+		queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+	else
+		queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NDRange(8, 8, 8));
 
+	queue.enqueueReadBuffer(buf_out, CL_TRUE, 0, total_points * sizeof(float), out);
+	queue.flush();
+	queue.finish();
 	double acc = 0.0;
 
 	for(int i = 0; i < total_points; i++)
 	{
-		std::cout << out[i] << std::endl;
 		acc += out[i];	
 	}
-
-	std::cin.get();
 
 	for(j=0;j<k;j++){
 		acc = acc*(b[j]-a[j]);
@@ -169,15 +173,18 @@ Timer* Test0()
 	return t0;
 }
 
-void Test1()
-{
+Timer* Test1()
+{ 
 	double exact=1.95683793560212f;	// Correct to about 10 digits
 	float a[2]={0,0};
 	float b[2]={1,1};
 	float params[2]={0.5,0.5};
 	int n;
+
+	Timer* t1 = new Timer();
 	
-	for(n=2;n<=1024;n*=2){		
+	for(n=2;n<=1024;n*=2){
+		t1->Start(tbb::tick_count::now());
 		double res=IntegrateExample(
 		  1, // functionCode,
 		  n,	// How many points on each dimension
@@ -185,18 +192,24 @@ void Test1()
 		  b, // An array of k upper bounds
 		  params // Parameters to function
 		);
+		t1->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F1, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
+
+	return t1;
 }
 
-void Test2()
+Timer* Test2()
 {
 	double exact=9.48557252267795;	// Correct to about 6 digits
 	float a[3]={-1,-1,-1};
 	float b[3]={1,1,1};
 	int n;
+
+	Timer* t2 = new Timer();
 	
-	for(n=2;n<=256;n*=2){		
+	for(n=2;n<=256;n*=2){
+		t2->Start(tbb::tick_count::now());
 		double res=IntegrateExample(
 		  2, // functionCode,
 		  n,	// How many points on each dimension
@@ -204,19 +217,25 @@ void Test2()
 		  b, // An array of k upper bounds
 		  NULL // Parameters to function (no parameters for this function)
 		);
+		t2->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F2, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
+
+	return t2;
 }
 
-void Test3()
+Timer* Test3()
 {
 	double exact=-7.18387139942142f;	// Correct to about 6 digits
 	float a[3]={0,0,0};
 	float b[3]={5,5,5};
 	float params[1]={2};
 	int n;
-	
-	for(n=2;n<=256;n*=2){		
+
+	Timer* t3 = new Timer();
+
+	for(n=2;n<=256;n*=2){
+		t3->Start(tbb::tick_count::now());
 		double res=IntegrateExample(
 		  3, // functionCode,
 		  n,	// How many points on each dimension
@@ -224,8 +243,10 @@ void Test3()
 		  b, // An array of k upper bounds
 		  params // Parameters to function (no parameters for this function)
 		);
+		t3->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F3, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
 	}
+	return t3;
 }
 
 void Test4()

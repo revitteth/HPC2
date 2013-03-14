@@ -20,19 +20,27 @@
 
 int main(int argc, char **argv){ 
 
+	//std::cout << "		0" << std::endl;
+	//std::cout << "GPU " << Test0()->totalTime() << std::endl;
+	//std::cout << "CPU " << Test0_dumb()->totalTime() << std::endl;
 	//std::cout << "		1" << std::endl;
-	//Test0();
-	//Test0_dumb();
+	//std::cout << "GPU " << Test1()->totalTime() << std::endl;
+	//std::cout << "CPU " << Test1_dumb()->totalTime() << std::endl;
 	//std::cout << "		2" << std::endl;
-	//Test1();
-	//Test1_dumb();
+	//std::cout << "GPU " << Test2()->totalTime() << std::endl;
+	//std::cout << "CPU " << Test2_dumb()->totalTime() << std::endl;
 	std::cout << "		3" << std::endl;
-	Test2();
-	Test2_dumb();
-	//Test3();
+	std::cout << "GPU " << Test3()->totalTime() << std::endl;
+	std::cout << "CPU " << Test3_dumb()->totalTime() << std::endl;
 	//Test4();
+	//Test4_dumb();
 	//Test5();
 	//Test6();
+
+	//Test0();
+	//Test1();
+	//Test2();
+	//Test3();
 	
 
 	std::cin.get();
