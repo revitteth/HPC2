@@ -1,4 +1,4 @@
-__kernel void integrate_F4(
+__kernel void integrate_F6(
 		__constant float* a, 
 		__constant float* b, 
 		__global float* out,
@@ -20,15 +20,18 @@ __kernel void integrate_F4(
 	x[1]=a[1]+(b[1]-a[1]) * native_divide((i1+0.5f), n[1]);
 	x[0]=a[0]+(b[0]-a[0]) * native_divide((i0+0.5f), n[0]);
 
-	float acc = 0;
+	float a2 = powf(powf(x[0],2) + powf(x[1],2) + powf(x[2],2),0.5); // distance from origin
+	float d = (a2 - params[0]);	// How far from surface of sphere
 
-	acc+= (params[0]*x[0] + params[1]*x[1] + params[2]*x[2]) * x[0];
-	acc+= (params[3]*x[0] + params[4]*x[1] + params[5]*x[2]) * x[1];
-	acc+= (params[6]*x[0] + params[7]*x[1] + params[8]*x[2]) * x[2];
+	d = fabs(d);
 
-	float brian = native_exp(native_divide(-acc, 2));
-	float dave = params[9] * brian;
-
-	out[index] = dave;
+	if(d < params[1])
+	{
+		out[index] = 1;
+	}
+	else
+	{
+		out[index] = 0;
+	}
 
 }	

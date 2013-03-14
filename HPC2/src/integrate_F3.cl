@@ -3,8 +3,7 @@ __kernel void integrate_F3(
 		__constant float* b, 
 		__global float* out,
 		__constant int* n,
-		__constant float* params,
-		__constant int* p_size
+		__constant float* params
 		)
 {
 	// get local id of work item 
@@ -24,7 +23,7 @@ __kernel void integrate_F3(
 	x[0]=a[0]+(b[0]-a[0]) * native_divide((i0+0.5f), n[0]);
 
 	float v = native_powr(x[0], params[0]) + native_powr(x[1], params[0]) + native_powr(x[2],params[0]);
-	float dave = native_powr(v, native_divide(1, params[0]));
+	float dave = native_powr(v, native_recip(params[0]));
 	float geoff = native_divide(sin(dave), dave);
 
 	out[index] = geoff;

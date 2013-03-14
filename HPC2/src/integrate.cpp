@@ -29,18 +29,15 @@ int main(int argc, char **argv){
 	//std::cout << "		2" << std::endl;
 	//std::cout << "GPU " << Test2()->totalTime() << std::endl;
 	//std::cout << "CPU " << Test2_dumb()->totalTime() << std::endl;
-	std::cout << "		3" << std::endl;
-	std::cout << "GPU " << Test3()->totalTime() << std::endl;
-	std::cout << "CPU " << Test3_dumb()->totalTime() << std::endl;
-	//Test4();
+	//std::cout << "		3" << std::endl;
+	//std::cout << "GPU " << Test3()->totalTime() << std::endl;
+	//std::cout << "CPU " << Test3_dumb()->totalTime() << std::endl;
+	Test4();
 	//Test4_dumb();
 	//Test5();
+	//Test5_dumb();
 	//Test6();
-
-	//Test0();
-	//Test1();
-	//Test2();
-	//Test3();
+	//Test6_dumb();
 	
 
 	std::cin.get();

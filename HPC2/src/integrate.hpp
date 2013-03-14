@@ -103,14 +103,12 @@ double IntegrateExample(
 	cl::Buffer buf_out = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, total_points * sizeof(float));
 	cl::Buffer buf_n = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, 3 * sizeof(int));
 	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, p_size_max * sizeof(float));
-	cl::Buffer buf_p_size = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(int));
 		
 	// Copy data to memory buffers
 	queue.enqueueWriteBuffer(buf_a, CL_FALSE, 0, k * sizeof(float), &a[0]);
 	queue.enqueueWriteBuffer(buf_b, CL_FALSE, 0, k * sizeof(float), &b[0]);
 	queue.enqueueWriteBuffer(buf_n, CL_FALSE, 0, 3 * sizeof(int), &n_array[0]);
 	queue.enqueueWriteBuffer(buf_params, CL_FALSE, 0, p_size_max * sizeof(float), &new_params[0]);
-	queue.enqueueWriteBuffer(buf_p_size, CL_FALSE, 0, sizeof(int), &p_size);
  
 	// Set arguments to kernel
 	kernel.setArg(0, buf_a);
@@ -118,7 +116,6 @@ double IntegrateExample(
 	kernel.setArg(2, buf_out);
 	kernel.setArg(3, buf_n);
 	kernel.setArg(4, buf_params);
-	kernel.setArg(5, buf_p_size);
 	
 	cl::NDRange global(n0, n1, n2);
 	cl::NDRange local(2, 2, 2);	
@@ -266,6 +263,7 @@ void Test4()
 	int n;
 	
 	for(n=2;n<=512;n*=2){		
+	//for(n=2;n<=256;n*=2){
 		double res=IntegrateExample(
 		  4, // functionCode,
 		  n,	// How many points on each dimension
@@ -284,7 +282,8 @@ void Test5()
 	float b[3]={3,3,3};
 	int n;
 	
-	for(n=2;n<=512;n*=2){		
+	//for(n=2;n<=512;n*=2){		
+	for(n=2;n<=256;n*=2){
 		double res=IntegrateExample(
 		  5, // functionCode,
 		  n,	// How many points on each dimension

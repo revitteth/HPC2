@@ -58,5 +58,11 @@
     <None Include="src\integrate_F4.cl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="src\integrate_F5.cl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\integrate_F6.cl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
