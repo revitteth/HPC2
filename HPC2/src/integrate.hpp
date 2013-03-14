@@ -73,7 +73,7 @@ double IntegrateExample(
 		(cl_context_properties)(platforms[0])(),
 		0
 	};
-	cl::Context context(CL_DEVICE_TYPE_GPU, cps);
+	cl::Context context(CL_DEVICE_TYPE_CPU, cps);
  
 	// Get a list of devices on this platform
 	cl::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
@@ -105,10 +105,10 @@ double IntegrateExample(
 	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, p_size_max * sizeof(float));
 		
 	// Copy data to memory buffers
-	queue.enqueueWriteBuffer(buf_a, CL_FALSE, 0, k * sizeof(float), &a[0]);
-	queue.enqueueWriteBuffer(buf_b, CL_FALSE, 0, k * sizeof(float), &b[0]);
-	queue.enqueueWriteBuffer(buf_n, CL_FALSE, 0, 3 * sizeof(int), &n_array[0]);
-	queue.enqueueWriteBuffer(buf_params, CL_FALSE, 0, p_size_max * sizeof(float), &new_params[0]);
+	queue.enqueueWriteBuffer(buf_a, CL_TRUE, 0, k * sizeof(float), &a[0]);
+	queue.enqueueWriteBuffer(buf_b, CL_TRUE, 0, k * sizeof(float), &b[0]);
+	queue.enqueueWriteBuffer(buf_n, CL_TRUE, 0, 3 * sizeof(int), &n_array[0]);
+	queue.enqueueWriteBuffer(buf_params, CL_TRUE, 0, p_size_max * sizeof(float), &new_params[0]);
  
 	// Set arguments to kernel
 	kernel.setArg(0, buf_a);
