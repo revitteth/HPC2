@@ -34,7 +34,7 @@ double IntegrateExample(
 	const int p_size_max = 10;
 
 	// split the problem into chunks
-	int chunks = 2;
+	const int chunks = 2;
 
 	int n0=n, n1=n, n2=n;	// By default use n points in each dimension
 
@@ -52,12 +52,14 @@ double IntegrateExample(
 			exit(1);
 	}
 
+	int n_array[3] = {n0, n1, n2};
+	int full_total_points = n0*n1*n2;
+
 	n0 = n0/chunks;
 	n1 = n1/chunks;
 	n2 = n2/chunks;
 
 	int total_points = n0*n1*n2;
-	int n_array[3] = {n0, n1, n2};
 
 	float* new_params = new float[p_size_max];
 	if (p_size > 0)
@@ -110,7 +112,6 @@ double IntegrateExample(
 	cl::Buffer buf_out = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, total_points * sizeof(float));
 	cl::Buffer buf_n = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, 3 * sizeof(int));
 	cl::Buffer buf_params = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, p_size_max * sizeof(float));
-	cl::Buffer buf_acc = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(float));
 	cl::Buffer buf_chunks = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(int));
 		
 	// Copy data to memory buffers
@@ -126,35 +127,31 @@ double IntegrateExample(
 	kernel.setArg(2, buf_out);
 	kernel.setArg(3, buf_n);
 	kernel.setArg(4, buf_params);
-	kernel.setArg(5, buf_acc);
-	kernel.setArg(6, buf_chunks);
+	kernel.setArg(5, buf_chunks);
 	
 	cl::NDRange global(n0, n1, n2);
-	cl::NDRange local(1, 1, 1);	
+	queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
 
-	// Run the kernel on specific ND range
-	float* out = new float;
-	if (n2 == 1 | n1 == 1)
-		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(total_points), cl::NDRange(1));
-	else if (n <= 8)
-		queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
-	else
-		queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NDRange(2,2,2));
-
-	queue.enqueueReadBuffer(buf_acc, CL_TRUE, 0, sizeof(float), out);
+	float* out = new float[total_points];
+	queue.enqueueReadBuffer(buf_out, CL_TRUE, 0, total_points * sizeof(float), out);
 
 	queue.flush();
 	queue.finish();
 
 	float acc = 0.0;
+	for(int i = 0; i < total_points; i++)
+	{
+		//std::cout << out[i] << std::endl;
+		acc += out[i];
+	}
 
-	acc = *out;
+	//std::cin.get();
 
 	for(j=0;j<k;j++){
 		acc = acc*(b[j]-a[j]);
 	}
 
-	return acc/(total_points);
+	return acc/(full_total_points);
 }
 
 Timer* Test0()

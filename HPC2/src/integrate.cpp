@@ -43,7 +43,7 @@ int main(int argc, char **argv){
 	//std::cout << "-----------------------------------------------------------" << std::endl;
 	//std::cout << "-----------------------------------------------------------" << std::endl << std::endl;
 	Test4();
-	//Test4_dumb();
+	Test4_dumb();
 	//Test5();
 	//Test5_dumb();
 	//Test6();
