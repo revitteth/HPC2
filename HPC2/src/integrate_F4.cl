@@ -13,8 +13,8 @@ __kernel void integrate_F4(
 	int gid2 = get_global_id(2);
 	int gs1 = get_global_size(1);
 
-	__private float acc = 0;
-	__private float acc2 = 0;
+	__private float group_acc = 0;
+	__private float onetime_acc = 0;
 	__private float geofferson = 0;
 	__private float x_ptr[3] = { 0.0f };
 
@@ -32,18 +32,18 @@ __kernel void integrate_F4(
 				x_ptr[1] = a[1]+(b[1]-a[1]) * native_divide((i1+0.5f), n[1]);
 				x_ptr[0] = a[0]+(b[0]-a[0]) * native_divide((i0+0.5f), n[0]);
 
-				acc += (params[0]*x_ptr[0] + params[1]*x_ptr[1] + params[2]*x_ptr[2]) * x_ptr[0];
-				acc += (params[3]*x_ptr[0] + params[4]*x_ptr[1] + params[5]*x_ptr[2]) * x_ptr[1];
-				acc += (params[6]*x_ptr[0] + params[7]*x_ptr[1] + params[8]*x_ptr[2]) * x_ptr[2];
+				onetime_acc = (params[0]*x_ptr[0] + params[1]*x_ptr[1] + params[2]*x_ptr[2]) * x_ptr[0];
+				onetime_acc += (params[3]*x_ptr[0] + params[4]*x_ptr[1] + params[5]*x_ptr[2]) * x_ptr[1];
+				onetime_acc += (params[6]*x_ptr[0] + params[7]*x_ptr[1] + params[8]*x_ptr[2]) * x_ptr[2];
 
-				float winstanley = native_exp(native_divide(-acc, 2));
+				float winstanley = native_exp(native_divide(-onetime_acc, 2));
 				geofferson = params[9] * winstanley;
-				acc2 += geofferson;
+				group_acc += geofferson;
 			}
 		}
 	}
 
-	out[gid0 + gid1*gs1 + gid2*gs1*gs1] = geofferson;
+	out[gid2*gs1*gs1 + gid1*gs1 + gid0] = group_acc;
 	
 
 }	

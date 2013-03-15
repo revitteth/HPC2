@@ -34,7 +34,27 @@ double IntegrateExample(
 	const int p_size_max = 10;
 
 	// split the problem into chunks
-	const int chunks = 2;
+
+	int chunks = 1;
+
+	if ( n > 128 & n < 512)
+	{
+		chunks = n/128;
+	}
+	else if (512 <= n)
+	{
+		chunks = 8;
+	}
+
+	//int chunks = 8;
+	//if(n < 4)
+	//{
+	//	chunks = 2;
+	//}
+	//else if (n < 8)
+	//{
+	//	chunks = 4;
+	//}
 
 	int n0=n, n1=n, n2=n;	// By default use n points in each dimension
 
@@ -254,7 +274,7 @@ Timer* Test3()
 	return t3;
 }
 
-void Test4()
+Timer* Test4()
 {
 	double exact=0.677779532970409f;	// Correct to about 8 digits
 	float a[3]={-16,-16,-16};	// We're going to cheat, and assume -16=-infinity.
@@ -269,9 +289,11 @@ void Test4()
 		(float)pow(2*PI,-3.0/2.0)*pow(0.5,-0.5) // This is the scale factor
 	};
 	int n;
+
+	Timer* t4 = new Timer();
 	
 	for(n=2;n<=512;n*=2){		
-	//for(n=2;n<=256;n*=2){
+		t4->Start(tbb::tick_count::now());
 		double res=IntegrateExample(
 		  4, // functionCode,
 		  n,	// How many points on each dimension
@@ -279,19 +301,23 @@ void Test4()
 		  b, // An array of k upper bounds
 		  params // Parameters to function (no parameters for this function)
 		);
+		t4->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F4, n=%d, value=%lf, error=%lg	\n", n, res, res-exact);
 	}
+	return t4;
 }
 
-void Test5()
+Timer* Test5()
 {
 	double exact=13.4249394627056;	// Correct to about 6 digits
 	float a[3]={0,0,0};
 	float b[3]={3,3,3};
 	int n;
+
+	Timer* t5 = new Timer();
 	
-	//for(n=2;n<=512;n*=2){		
-	for(n=2;n<=256;n*=2){
+	for(n=2;n<=512;n*=2){		
+		t5->Start(tbb::tick_count::now());
 		double res=IntegrateExample(
 		  5, // functionCode,
 		  n,	// How many points on each dimension
@@ -299,11 +325,14 @@ void Test5()
 		  b, // An array of k upper bounds
 		  NULL
 		);
+		t5->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F5, n=%d, value=%lf, error=%lg	\n", n, res, res-exact);
 	}
+
+	return t5;
 }
 
-void Test6()
+Timer* Test6()
 {
 	// Integrate over a shell with radius 3 and width 0.02
 	//  = volume of a sphere of 3.01 minus a sphere of 2.99
@@ -313,7 +342,10 @@ void Test6()
 	float params[2]={3,0.01};
 	int n;
 	
-	for(n=2;n<=2048;n*=2){		
+	Timer* t6 = new Timer();
+
+	for(n=2;n<=2048;n*=2){
+		t6->Start(tbb::tick_count::now());
 		double res=IntegrateExample(
 		  6, // functionCode,
 		  n,	// How many points on each dimension
@@ -321,8 +353,10 @@ void Test6()
 		  b, // An array of k upper bounds
 		  params
 		);
+		t6->Stop(tbb::tick_count::now());
 		fprintf(stderr, "F6, n=%d, value=%lf, error=%lg	\n", n, res, res-exact);
 	}
+	return t6;
 }
 
 
