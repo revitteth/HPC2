@@ -18,19 +18,23 @@ __kernel void integrate_F5(
 
 	for (int z = 0; z < chunks; z++)
 	{
+		int i2 = gid2 * chunks + z;
+		x_ptr[2] = a[2]+(b[2]-a[2]) * native_divide((i2+0.5f), n[2]);
+
 		for(int y = 0; y < chunks; y++)
 		{
+			int i1 = gid1 * chunks + y;
+			x_ptr[1] = a[1]+(b[1]-a[1]) * native_divide((i1+0.5f), n[1]);
+
 			for(int x = 0; x < chunks; x++)
 			{
-				int i2 = gid2 * chunks + z;
-				int i1 = gid1 * chunks + y;
 				int i0 = gid0 * chunks + x;
-
-				x_ptr[2] = a[2]+(b[2]-a[2]) * native_divide((i2+0.5f), n[2]);
-				x_ptr[1] = a[1]+(b[1]-a[1]) * native_divide((i1+0.5f), n[1]);
 				x_ptr[0] = a[0]+(b[0]-a[0]) * native_divide((i0+0.5f), n[0]);
 
-				group_acc += pow(pow(native_sin( pow(x_ptr[0], x_ptr[1]) ), 2), x_ptr[2]);
+				float intermediate1 =  native_sin( pow(x_ptr[0], x_ptr[1]) );
+				float intermediate2 =  pow(intermediate1, 2);
+
+				group_acc += pow(intermediate2, x_ptr[2]);
 			}
 		}
 	}

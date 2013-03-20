@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\dumb_impl.cpp" />
     <ClCompile Include="src\integrate.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -27,9 +26,7 @@
     <None Include="src\integrate_F4.cl" />
     <None Include="src\integrate_F5.cl" />
     <None Include="src\integrate_F6.cl" />
-    <None Include="src\integrate_setup.cl" />
     <None Include="src\integrate_F0.cl" />
-    <None Include="src\vector_add_kernel.cl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{18569E42-EE61-45DD-9617-BE2979A95547}</ProjectGuid>

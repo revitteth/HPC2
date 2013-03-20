@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\dumb_impl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\integrate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -37,12 +34,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\vector_add_kernel.cl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="src\integrate_setup.cl">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="src\integrate_F0.cl">
       <Filter>Source Files</Filter>
     </None>

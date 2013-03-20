@@ -51,12 +51,12 @@ double IntegrateExample_dumb(
 
 	// Loop over highest dimension on outside, as it might be collapsed to zero
 	for(i2=0;i2<n2;i2++){
-		if(k>=2){
+		if(k>2){
 			x[2]=a[2]+(b[2]-a[2]) * (i2+0.5f)/n2;
 		}
 		
 		for(i1=0;i1<n1;i1++){
-			if(k>=1){
+			if(k>1){
 				x[1]=a[1]+(b[1]-a[1]) * (i1+0.5f)/n1;
 			}
 			
@@ -212,7 +212,7 @@ Timer* Test4_dumb()
 	
 	for(n=2;n<=512;n*=2){		
 		t4->Start(tbb::tick_count::now());
-		double res=IntegrateExample(
+		double res=IntegrateExample_dumb(
 		  4, // functionCode,
 		  n,	// How many points on each dimension
 		  a, // An array of k lower bounds

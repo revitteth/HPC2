@@ -4,8 +4,7 @@ __kernel void integrate_F1(
 		__global float* out,
 		__constant int* n,
 		__constant float* params,
-		__global float* acc,
-		__constant int* chunks
+		__constant int* pchunks
 		)
 {
 	// get local id of work item
@@ -14,7 +13,7 @@ __kernel void integrate_F1(
 	int i0 = get_global_id(0);
 	int i1 = get_global_id(1);
 
-	float x[3] = { 0.0f };
+	__private float x[3] = { 0.0f };
 
 	x[1]=a[1]+(b[1]-a[1]) * native_divide((i1+0.5f), n[1]);
 	x[0]=a[0]+(b[0]-a[0]) * native_divide((i0+0.5f), n[0]);
