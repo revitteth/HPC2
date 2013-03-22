@@ -178,7 +178,7 @@ Timer* Test0()
 	float b[1]={1};
 	float* errEst = 0;
 	float eps = 10;
-	int n;
+	int n = N_POINTS;
 	
 	Timer* t0 = new Timer();
 
@@ -205,7 +205,7 @@ Timer* Test1()
 	float params[2]={0.5,0.5};
 	float* errEst = 0;
 	float eps = 10;
-	int n;
+	int n = N_POINTS;
 
 	Timer* t1 = new Timer();
 	
@@ -231,7 +231,7 @@ Timer* Test2()
 	float b[3]={1,1,1};
 	float* errEst = 0;
 	float eps = 10;
-	int n;
+	int n = N_POINTS;
 
 	Timer* t2 = new Timer();
 	
@@ -258,7 +258,7 @@ Timer* Test3()
 	float params[1]={2};
 	float* errEst = 0;
 	float eps = 10;
-	int n;
+	int n = N_POINTS;
 
 	Timer* t3 = new Timer();
 

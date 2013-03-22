@@ -18,9 +18,10 @@
 
 #include "Timer.hpp"
 
-int main(int argc, char **argv){ 
+int main(int argc, char **argv)
+{ 
 
-	Test0();	
+	std::cout << Test3()->lastTime() << std::endl;	
 
 	std::cin.get();
 	return 0;
