@@ -2,6 +2,7 @@
 #define TIMER_HPP_
 
 #include <tbb/tbb.h>
+#include <string>
 
 // Time units of code easily with this class
 class Timer
@@ -9,6 +10,7 @@ class Timer
 	private: 
 		tbb::tick_count start_time, end_time;
 		std::vector<double> times;
+		std::vector<std::string> strings;
 
 	public:
 		// default constructor
@@ -48,6 +50,21 @@ class Timer
 				sum += times.at(i);
 			}
 			return sum;
+		}
+
+
+		void addString(std::string str)
+		{
+			strings.push_back(str);
+		}
+
+		void printStrings()
+		{
+			for (int i = 0; i < strings.size(); i++)
+			{
+				std::cout << strings.at(i) << std::endl;
+			}
+			std::cout << std::endl;
 		}
 };
 

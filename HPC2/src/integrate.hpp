@@ -3,7 +3,7 @@
 
 #define __CL_ENABLE_EXCEPTIONS
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
-#define N_POINTS 128
+#define START_N 64  // starting n value (gets doubled on entry)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,19 +24,17 @@ std::string NumberToString ( T Number )
 	return ss.str();
 }
 
-double Integrate(
-  int functionCode,
-  const float *a, // An array of k lower bounds
-  const float *b, // An array of k upper bounds
-  float eps, // Target accuracy
-  const float *params, // Parameters to function
-  float *errorEstimate // Estimated error in integral
-){
+double Integrate_GPU(
+	int functionCode,
+	int n,	// How many points on each dimension
+	const float *a, // An array of k lower bounds
+	const float *b, // An array of k upper bounds
+	const float *params // Parameters to function
+)
+{
 	int k=-1, total=-1, i0, i1, i2, j;
 	int p_size = 0;
 	const int p_size_max = 10;
-
-	const int n = N_POINTS;
 
 	// split the problem into 3D chunks
 	int chunks = 4;
@@ -107,7 +105,7 @@ double Integrate(
 	cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
  
 	// Read source file
-	std::ifstream sourceFile("..\\HPC2\\src\\" + func + ".cl");
+	std::ifstream sourceFile(func + ".cl");
 	std::string sourceCode(
 		std::istreambuf_iterator<char>(sourceFile),
 		(std::istreambuf_iterator<char>()));
@@ -171,14 +169,47 @@ double Integrate(
 	return acc/(full_total_points);
 }
 
+// Integrate - performs integration and error calculations
+double Integrate(
+	int functionCode,
+	const float *a, // An array of k lower bounds
+	const float *b, // An array of k upper bounds
+	float eps, // Target accuracy
+	const float *params, // Parameters to function
+	float *errorEstimate // Estimated error in integral
+	)
+{
+	int n = START_N;
+	double result;
+	double err_check_result;
+	float est_err;
+
+	est_err = eps * 1000;
+
+	while(abs(est_err) > eps)
+	{
+		n *= 2;
+		// run integration for n and n/2 to calculate error
+		result = Integrate_GPU(functionCode, n, a, b, params);
+		err_check_result = Integrate_GPU(functionCode, n/2, a, b, params);
+		est_err = result - err_check_result;
+	}
+
+	*errorEstimate = est_err;
+
+	//std::cout << est_err;
+	std::cout << "N = " << n << " ";
+
+	return result;
+}
+
 Timer* Test0()
 {
 	double exact=(exp(1)-1);	// Exact result
 	float a[1]={0};
 	float b[1]={1};
-	float* errEst = 0;
-	float eps = 10;
-	int n = N_POINTS;
+	float errorEstimate;
+	float eps = 100;
 	
 	Timer* t0 = new Timer();
 
@@ -189,10 +220,16 @@ Timer* Test0()
 		b, // An array of k upper bounds
 		eps, // Target accuracy
 		NULL, // Parameters to function 
-		errEst // Error estimate (pointer to)
+		&errorEstimate // Error estimate (pointer to)
 	);
 	t0->Stop(tbb::tick_count::now());
-	fprintf(stderr, "F0, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
+
+	t0->addString("F0");
+	t0->addString(" Value = " + NumberToString(res));
+	t0->addString(" Error = " + NumberToString(res-exact));
+	t0->addString(" Err Est = " + NumberToString(errorEstimate));
+	t0->addString(" Eps = " + NumberToString(eps));
+	t0->addString(" Time = " + NumberToString(t0->lastTime()));
 	
 	return t0;
 }
@@ -203,9 +240,8 @@ Timer* Test1()
 	float a[2]={0,0};
 	float b[2]={1,1};
 	float params[2]={0.5,0.5};
-	float* errEst = 0;
-	float eps = 10;
-	int n = N_POINTS;
+	float errorEstimate;
+	float eps = 100;
 
 	Timer* t1 = new Timer();
 	
@@ -216,10 +252,15 @@ Timer* Test1()
 		b, // An array of k upper bounds
 		eps, // Target accuracy
 		params, // Parameters to function 
-		errEst // Error estimate (pointer to)
-	);
+		&errorEstimate // Error estimate (pointer to)
+	);			
 	t1->Stop(tbb::tick_count::now());
-	fprintf(stderr, "F1, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
+	t1->addString("F1");
+	t1->addString(" Value = " + NumberToString(res));
+	t1->addString(" Error = " + NumberToString(res-exact));
+	t1->addString(" Err Est = " + NumberToString(errorEstimate));
+	t1->addString(" Eps = " + NumberToString(eps));
+	t1->addString(" Time = " + NumberToString(t1->lastTime()));
 
 	return t1;
 }
@@ -229,9 +270,8 @@ Timer* Test2()
 	double exact=9.48557252267795;	// Correct to about 6 digits
 	float a[3]={-1,-1,-1};
 	float b[3]={1,1,1};
-	float* errEst = 0;
-	float eps = 10;
-	int n = N_POINTS;
+	float errorEstimate;
+	float eps = 100;
 
 	Timer* t2 = new Timer();
 	
@@ -242,10 +282,15 @@ Timer* Test2()
 		b, // An array of k upper bounds
 		eps, // Target accuracy
 		NULL, // Parameters to function 
-		errEst // Error estimate (pointer to)
+		&errorEstimate // Error estimate (pointer to)
 	);
 	t2->Stop(tbb::tick_count::now());
-	fprintf(stderr, "F2, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
+	t2->addString("F2");
+	t2->addString(" Value = " + NumberToString(res));
+	t2->addString(" Error = " + NumberToString(res-exact));
+	t2->addString(" Err Est = " + NumberToString(errorEstimate));
+	t2->addString(" Eps = " + NumberToString(eps));
+	t2->addString(" Time = " + NumberToString(t2->lastTime()));
 
 	return t2;
 }
@@ -256,9 +301,8 @@ Timer* Test3()
 	float a[3]={0,0,0};
 	float b[3]={5,5,5};
 	float params[1]={2};
-	float* errEst = 0;
-	float eps = 10;
-	int n = N_POINTS;
+	float errorEstimate;
+	float eps = 100;
 
 	Timer* t3 = new Timer();
 
@@ -269,10 +313,15 @@ Timer* Test3()
 		b, // An array of k upper bounds
 		eps, // Target accuracy
 		params, // Parameters to function 
-		errEst // Error estimate (pointer to)
+		&errorEstimate // Error estimate (pointer to)
 	);
 	t3->Stop(tbb::tick_count::now());
-	fprintf(stderr, "F3, n=%d, value=%lf, error=%lg\n", n, res, res-exact);
+	t3->addString("F3");
+	t3->addString(" Value = " + NumberToString(res));
+	t3->addString(" Error = " + NumberToString(res-exact));
+	t3->addString(" Err Est = " + NumberToString(errorEstimate));
+	t3->addString(" Eps = " + NumberToString(eps));
+	t3->addString(" Time = " + NumberToString(t3->lastTime()));
 	
 	return t3;
 }
@@ -291,9 +340,8 @@ Timer* Test4()
 		-0.5, -0.5, 1.5,
 		(float)pow(2*PI,-3.0/2.0)*pow(0.5,-0.5) // This is the scale factor
 	};
-	float* errEst = 0;
-	float eps = 10;
-	int n;
+	float errorEstimate;
+	float eps = 100;
 
 	Timer* t4 = new Timer();
 	
@@ -304,10 +352,15 @@ Timer* Test4()
 		b, // An array of k upper bounds
 		eps, // Target accuracy
 		params, // Parameters to function 
-		errEst // Error estimate (pointer to)
+		&errorEstimate // Error estimate (pointer to)
 	);
 	t4->Stop(tbb::tick_count::now());
-	fprintf(stderr, "F4, n=%d, value=%lf, error=%lg	\n", n, res, res-exact);
+	t4->addString("F4");
+	t4->addString(" Value = " + NumberToString(res));
+	t4->addString(" Error = " + NumberToString(res-exact));
+	t4->addString(" Err Est = " + NumberToString(errorEstimate));
+	t4->addString(" Eps = " + NumberToString(eps));
+	t4->addString(" Time = " + NumberToString(t4->lastTime()));
 
 	return t4;
 }
@@ -317,9 +370,8 @@ Timer* Test5()
 	double exact=13.4249394627056;	// Correct to about 6 digits
 	float a[3]={0,0,0};
 	float b[3]={3,3,3};
-	float* errEst = 0;
-	float eps = 10;
-	int n;
+	float errorEstimate;
+	float eps = 100;
 
 	Timer* t5 = new Timer();
 	
@@ -330,10 +382,15 @@ Timer* Test5()
 		b, // An array of k upper bounds
 		eps, // Target accuracy
 		NULL, // Parameters to function 
-		errEst // Error estimate (pointer to)
+		&errorEstimate // Error estimate (pointer to)
 	);
 	t5->Stop(tbb::tick_count::now());
-	fprintf(stderr, "F5, n=%d, value=%lf, error=%lg	\n", n, res, res-exact);
+	t5->addString("F5");
+	t5->addString(" Value = " + NumberToString(res));
+	t5->addString(" Error = " + NumberToString(res-exact));
+	t5->addString(" Err Est = " + NumberToString(errorEstimate));
+	t5->addString(" Eps = " + NumberToString(eps));
+	t5->addString(" Time = " + NumberToString(t5->lastTime()));
 
 	return t5;
 }
@@ -346,9 +403,8 @@ Timer* Test6()
 	float a[3]={-4,-4,-4};
 	float b[3]={4,4,4};
 	float params[2]={3,0.01};
-	float* errEst = 0;
-	float eps = 10;
-	int n;
+	float errorEstimate;
+	float eps = 100;
 	
 	Timer* t6 = new Timer();
 
@@ -359,10 +415,15 @@ Timer* Test6()
 		b, // An array of k upper bounds
 		eps, // Target accuracy
 		params, // Parameters to function 
-		errEst // Error estimate (pointer to)
+		&errorEstimate // Error estimate (pointer to)
 	);
 	t6->Stop(tbb::tick_count::now());
-	fprintf(stderr, "F6, n=%d, value=%lf, error=%lg	\n", n, res, res-exact);
+	t6->addString("F6");
+	t6->addString(" Value = " + NumberToString(res));
+	t6->addString(" Error = " + NumberToString(res-exact));
+	t6->addString(" Err Est = " + NumberToString(errorEstimate));
+	t6->addString(" Eps = " + NumberToString(eps));
+	t6->addString(" Time = " + NumberToString(t6->lastTime()));
 
 	return t6;
 }

@@ -262,7 +262,7 @@ Timer* Test6_dumb()
 	
 	Timer* t6 = new Timer();
 
-	for(n=2;n<=2048;n*=2){	
+	for(n=2;n<=256;n*=2){	
 		t6->Start(tbb::tick_count::now());
 		double res=IntegrateExample_dumb(
 		  6, // functionCode,

@@ -9,20 +9,26 @@
 #include <fstream>
 #include <string>
 
-// I think the idea is we rewrite these
 #include "functions.hpp"
-// In here, making use of OpenCL
+#
+// OpenCL implementation of function Integrate(...)
 #include "integrate.hpp"
-
+// CPU implementation of function IntegrateExample_dumb(...)
 #include "dumb_impl.hpp"
-
+// Useful timer class also collects strings to be output
 #include "Timer.hpp"
 
 int main(int argc, char **argv)
 { 
+	// Call my test functions which evaluate each kernel
+	// Console will print value, error, estimated error, time etc.
+	Test0()->printStrings();	
+	Test1()->printStrings();
+	Test2()->printStrings();
+	Test3()->printStrings();
+	Test4()->printStrings();
+	Test5()->printStrings();
+	Test6()->printStrings();
 
-	std::cout << Test3()->lastTime() << std::endl;	
-
-	std::cin.get();
 	return 0;
 }
